@@ -1,39 +1,48 @@
 const seatContainer = document.getElementById("seatContainer");
+const STORAGE_KEY = "libraryProSeats";
 
-async function loadSeats(){
+function createSeats() {
+  return Array.from({ length: 50 }, (_, idx) => ({
+    id: idx + 1,
+    number: idx + 1,
+    status: "free"
+  }));
+}
 
-const res = await fetch("/api/seats");
-const seats = await res.json();
+function loadSeatsFromStorage() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  return saved ? JSON.parse(saved) : createSeats();
+}
 
-seatContainer.innerHTML = "";
+function saveSeatsToStorage(seats) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(seats));
+}
 
-seats.forEach(seat=>{
+function renderSeats() {
+  const seats = loadSeatsFromStorage();
+  seatContainer.innerHTML = "";
 
+  seats.forEach((seat) => {
     const div = document.createElement("div");
-
     div.className = "seat";
-
-    if(seat.status === "booked"){
-        div.classList.add("booked");
+    if (seat.status === "booked") {
+      div.classList.add("booked");
     }
-
     div.innerText = seat.number;
 
-    div.onclick = async ()=>{
-
-        const res = await fetch(`/api/book/${seat.id}`,{
-            method:"POST"
-        });
-
-        const data = await res.json();
-
-        alert(data.message);
-
-        loadSeats();
+    div.onclick = () => {
+      if (seat.status === "booked") {
+        alert("This seat is already booked.");
+        return;
+      }
+      seat.status = "booked";
+      saveSeatsToStorage(seats);
+      renderSeats();
+      alert("Seat booked successfully");
     };
 
     seatContainer.appendChild(div);
-});
+  });
 }
 
-loadSeats();
+renderSeats();
