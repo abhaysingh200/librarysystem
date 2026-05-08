@@ -4,7 +4,7 @@ let seats = Array.from({ length: 50 }, (_, idx) => ({
   status: "free"
 }));
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   const { method, url } = req;
   const match = url.match(/^\/api\/(seats|book\/([0-9]+))$/);
 
@@ -38,4 +38,4 @@ export default function handler(req, res) {
   }
 
   res.status(405).json({ message: "Method not allowed" });
-}
+};
